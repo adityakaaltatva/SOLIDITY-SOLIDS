@@ -1,0 +1,36 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract EnergyTransfer {
+    
+    address public producer;
+    address public consumer;
+    uint public energyAmount;
+    uint public energyPrice;
+    bool public isCompleted;
+    
+    constructor(address _producer, address _consumer, uint _energyAmount, uint _energyPrice) {
+        producer = _producer;
+        consumer = _consumer;
+        energyAmount = _energyAmount;
+        energyPrice = _energyPrice;
+        isCompleted = false;
+    }
+    
+    function buyEnergy() public payable {
+        require(msg.sender == consumer, "Only consumer can buy energy");
+        require(msg.value == energyAmount * energyPrice, "Incorrect amount sent");
+        require(isCompleted == false, "Transaction already completed");
+        
+        payable(producer).transfer(msg.value);
+        isCompleted = true;
+    }
+    
+    function cancelTransaction() public {
+        require(msg.sender == producer, "Only producer can cancel transaction");
+        require(isCompleted == false, "Transaction already completed");
+        
+        payable(producer).transfer(address(this).balance);
+        isCompleted = true;
+    }
+}
